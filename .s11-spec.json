@@ -1,0 +1,734 @@
+{
+  "domain": "数据工程",
+  "subdirection": "数仓与数据湖",
+  "app_name": "维度建模开发中心",
+  "app_slug": "cc10033",
+  "app_desc": "面向数据仓库建设场景，提供维度建模、事实表设计、缓慢变化维和汇总层构建的建模平台",
+  "frontend": "vue",
+  "backend": "python",
+  "port_frontend": 5173,
+  "port_backend": 8000,
+  "modules": [
+    {
+      "key": "dim_definition",
+      "name": "维度定义",
+      "entity": "维度表",
+      "fields": [
+        "维度编码",
+        "维度名称",
+        "主键定义",
+        "SCD类型",
+        "粒度说明",
+        "数据来源",
+        "刷新频率"
+      ],
+      "statuses": [
+        "草稿",
+        "已建模",
+        "已发布",
+        "已停用"
+      ],
+      "actions": [
+        "提交建模",
+        "发布维度",
+        "停用维度"
+      ],
+      "action_targets": [
+        "草稿",
+        "已建模",
+        "已发布"
+      ],
+      "metrics": [
+        "维度总数",
+        "已发布数",
+        "停用数"
+      ],
+      "desc": "管理数据仓库的维度表定义，包括主键、SCD类型和粒度设计",
+      "page_shape": "crud-table",
+      "_page_shape_explicit": true
+    },
+    {
+      "key": "dim_attr",
+      "name": "维度属性",
+      "entity": "属性字段",
+      "fields": [
+        "属性名称",
+        "所属维度",
+        "数据类型",
+        "字段来源",
+        "是否派生",
+        "历史追踪",
+        "默认值"
+      ],
+      "statuses": [
+        "草稿",
+        "已确认",
+        "已下线"
+      ],
+      "actions": [
+        "确认属性",
+        "下线属性"
+      ],
+      "action_targets": [
+        "草稿",
+        "已确认"
+      ],
+      "metrics": [
+        "属性总数",
+        "已确认数",
+        "下线数"
+      ],
+      "desc": "管理维度表的属性字段定义，包括派生字段逻辑和历史追踪策略",
+      "page_shape": "crud-table",
+      "_page_shape_explicit": true
+    },
+    {
+      "key": "fact_design",
+      "name": "事实设计",
+      "entity": "事实表",
+      "fields": [
+        "事实名称",
+        "业务过程",
+        "粒度声明",
+        "关联维度",
+        "度量字段",
+        "分区字段",
+        "更新模式"
+      ],
+      "statuses": [
+        "草稿",
+        "已设计",
+        "已发布",
+        "已冻结"
+      ],
+      "actions": [
+        "提交设计",
+        "发布事实",
+        "冻结事实"
+      ],
+      "action_targets": [
+        "草稿",
+        "已设计",
+        "已发布"
+      ],
+      "metrics": [
+        "事实总数",
+        "已发布数",
+        "冻结数"
+      ],
+      "desc": "管理数据仓库的事实表设计，包括业务过程、粒度和维度关联",
+      "page_shape": "crud-table",
+      "_page_shape_explicit": true
+    },
+    {
+      "key": "measure_config",
+      "name": "度量配置",
+      "entity": "度量字段",
+      "fields": [
+        "度量名称",
+        "所属事实",
+        "度量类型",
+        "聚合方式",
+        "精度要求",
+        "是否可加",
+        "来源字段"
+      ],
+      "statuses": [
+        "草稿",
+        "已确认",
+        "已停用"
+      ],
+      "actions": [
+        "确认度量",
+        "停用度量"
+      ],
+      "action_targets": [
+        "草稿",
+        "已确认"
+      ],
+      "metrics": [
+        "度量总数",
+        "已确认数",
+        "停用数"
+      ],
+      "desc": "管理事实表的度量字段定义，包括度量类型、聚合方式和可加性标记",
+      "page_shape": "crud-table",
+      "_page_shape_explicit": true
+    },
+    {
+      "key": "scd_handler",
+      "name": "SCD处理",
+      "entity": "SCD策略",
+      "fields": [
+        "策略名称",
+        "目标维度",
+        "SCD类型",
+        "变化检测",
+        "生效时间",
+        "失效时间",
+        "当前标记"
+      ],
+      "statuses": [
+        "草稿",
+        "已启用",
+        "已停用"
+      ],
+      "actions": [
+        "启用策略",
+        "停用策略"
+      ],
+      "action_targets": [
+        "草稿",
+        "已启用"
+      ],
+      "metrics": [
+        "策略总数",
+        "已启用数",
+        "停用数"
+      ],
+      "desc": "管理缓慢变化维的处理策略，定义变化检测和生效/失效时间窗口",
+      "page_shape": "crud-table",
+      "_page_shape_explicit": true
+    },
+    {
+      "key": "surrogate_key",
+      "name": "代理键",
+      "entity": "键值定义",
+      "fields": [
+        "键值名称",
+        "目标维度",
+        "生成策略",
+        "初始值",
+        "步长",
+        "唯一范围",
+        "冲突处理"
+      ],
+      "statuses": [
+        "草稿",
+        "已分配",
+        "已耗尽",
+        "已重置"
+      ],
+      "actions": [
+        "分配键段",
+        "重置键值"
+      ],
+      "action_targets": [
+        "草稿",
+        "已耗尽"
+      ],
+      "metrics": [
+        "键值总数",
+        "已分配数",
+        "耗尽数"
+      ],
+      "desc": "管理维度表的代理键生成策略，包括键段分配和冲突处理",
+      "page_shape": "crud-table",
+      "_page_shape_explicit": true
+    },
+    {
+      "page_shape": "dag-graph",
+      "key": "hierarchy_build",
+      "name": "层级构建",
+      "entity": "层级关系",
+      "fields": [
+        "层级名称",
+        "所属维度",
+        "父子字段",
+        "层级路径",
+        "递归深度",
+        "桥接表",
+        "扁平化"
+      ],
+      "statuses": [
+        "草稿",
+        "已构建",
+        "已生效",
+        "已重建"
+      ],
+      "actions": [
+        "构建层级",
+        "重建层级"
+      ],
+      "action_targets": [
+        "草稿",
+        "已生效"
+      ],
+      "metrics": [
+        "层级总数",
+        "已构建数",
+        "重建数"
+      ],
+      "desc": "构建维度表的多级层级关系，支持父子、路径和桥接表三种模式",
+      "_page_shape_explicit": true
+    },
+    {
+      "key": "star_query",
+      "name": "星型查询",
+      "entity": "查询定义",
+      "fields": [
+        "查询名称",
+        "事实表",
+        "关联维度",
+        "度量选择",
+        "过滤条件",
+        "分组维度",
+        "结果限制"
+      ],
+      "statuses": [
+        "草稿",
+        "已验证",
+        "已发布",
+        "已过期"
+      ],
+      "actions": [
+        "验证查询",
+        "发布查询"
+      ],
+      "action_targets": [
+        "草稿",
+        "已验证"
+      ],
+      "metrics": [
+        "查询总数",
+        "已发布数",
+        "过期数"
+      ],
+      "desc": "定义基于星型模型的维度查询，包括事实与维度的关联和度量聚合",
+      "page_shape": "crud-table",
+      "_page_shape_explicit": true
+    },
+    {
+      "key": "agg_summary",
+      "name": "汇总构建",
+      "entity": "汇总表",
+      "fields": [
+        "汇总名称",
+        "源事实表",
+        "汇总维度",
+        "汇总度量",
+        "汇总粒度",
+        "刷新周期",
+        "增量标记"
+      ],
+      "statuses": [
+        "草稿",
+        "已构建",
+        "已刷新",
+        "构建失败"
+      ],
+      "actions": [
+        "执行构建",
+        "刷新汇总"
+      ],
+      "action_targets": [
+        "草稿",
+        "已刷新"
+      ],
+      "metrics": [
+        "汇总总数",
+        "已刷新数",
+        "失败数"
+      ],
+      "desc": "基于事实表构建多级汇总表，上卷维度、聚合度量并维护增量刷新",
+      "page_shape": "crud-table",
+      "_page_shape_explicit": true
+    },
+    {
+      "key": "dim_bridge",
+      "name": "桥接关联",
+      "entity": "桥接表",
+      "fields": [
+        "桥接名称",
+        "多对多维度",
+        "关联事实",
+        "权重字段",
+        "生效时间",
+        "失效时间",
+        "主记录标记"
+      ],
+      "statuses": [
+        "草稿",
+        "已生效",
+        "已失效"
+      ],
+      "actions": [
+        "启用桥接",
+        "停用桥接"
+      ],
+      "action_targets": [
+        "草稿",
+        "已生效"
+      ],
+      "metrics": [
+        "桥接总数",
+        "已生效数",
+        "失效数"
+      ],
+      "desc": "管理维度与事实之间的多对多桥接表，定义权重和时效性",
+      "page_shape": "crud-table",
+      "_page_shape_explicit": true
+    },
+    {
+      "key": "etl_mapping",
+      "name": "ETL映射",
+      "entity": "映射规则",
+      "fields": [
+        "规则名称",
+        "源表",
+        "目标表",
+        "字段映射",
+        "清洗逻辑",
+        "转换函数",
+        "写入模式"
+      ],
+      "statuses": [
+        "草稿",
+        "已测试",
+        "已部署",
+        "已废弃"
+      ],
+      "actions": [
+        "测试映射",
+        "部署规则",
+        "废弃规则"
+      ],
+      "action_targets": [
+        "草稿",
+        "已测试",
+        "已部署"
+      ],
+      "metrics": [
+        "规则总数",
+        "已部署数",
+        "废弃数"
+      ],
+      "desc": "定义从源系统到数仓模型的ETL字段映射和转换规则",
+      "page_shape": "crud-table",
+      "_page_shape_explicit": true
+    },
+    {
+      "key": "snapshot_plan",
+      "name": "快照计划",
+      "entity": "快照策略",
+      "fields": [
+        "策略名称",
+        "目标表",
+        "快照周期",
+        "保留份数",
+        "分区格式",
+        "增量标记",
+        "过期清理"
+      ],
+      "statuses": [
+        "草稿",
+        "已启用",
+        "已暂停"
+      ],
+      "actions": [
+        "启用策略",
+        "暂停策略"
+      ],
+      "action_targets": [
+        "草稿",
+        "已启用"
+      ],
+      "metrics": [
+        "策略总数",
+        "已启用数",
+        "暂停数"
+      ],
+      "desc": "管理数仓表的定期快照策略，定义周期、保留份数和自动清理",
+      "page_shape": "crud-table",
+      "_page_shape_explicit": true
+    },
+    {
+      "page_shape": "dag-graph",
+      "key": "model_lineage",
+      "name": "模型血缘",
+      "entity": "依赖关系",
+      "fields": [
+        "关系ID",
+        "上游模型",
+        "下游模型",
+        "依赖字段",
+        "关联类型",
+        "影响级别",
+        "更新状态"
+      ],
+      "statuses": [
+        "正常",
+        "变更中",
+        "断链",
+        "已下线"
+      ],
+      "actions": [
+        "分析影响",
+        "修复断链"
+      ],
+      "action_targets": [
+        "变更中",
+        "断链"
+      ],
+      "metrics": [
+        "关系总数",
+        "正常数",
+        "断链数"
+      ],
+      "desc": "追踪数仓模型之间的上下游依赖关系和字段级影响分析",
+      "_page_shape_explicit": true
+    },
+    {
+      "key": "conform_dim",
+      "name": "一致性维度",
+      "entity": "标准维度",
+      "fields": [
+        "标准名称",
+        "维度主题",
+        "标准键值",
+        "标准属性",
+        "适用范围",
+        "版本号",
+        "发布状态"
+      ],
+      "statuses": [
+        "草稿",
+        "已发布",
+        "已废止"
+      ],
+      "actions": [
+        "发布标准",
+        "废止标准"
+      ],
+      "action_targets": [
+        "草稿",
+        "已发布"
+      ],
+      "metrics": [
+        "标准总数",
+        "已发布数",
+        "废止数"
+      ],
+      "desc": "管理跨业务过程的一致性维度标准，确保维度定义和键值统一",
+      "page_shape": "crud-table",
+      "_page_shape_explicit": true
+    },
+    {
+      "key": "data_vault",
+      "name": "DataVault",
+      "entity": "Vault模型",
+      "fields": [
+        "模型名称",
+        "Hub实体",
+        "Link关系",
+        "Satellite属性",
+        "加载时间",
+        "记录源",
+        "哈希键"
+      ],
+      "statuses": [
+        "草稿",
+        "已建模",
+        "已加载",
+        "已归档"
+      ],
+      "actions": [
+        "提交建模",
+        "执行加载",
+        "归档模型"
+      ],
+      "action_targets": [
+        "草稿",
+        "已建模",
+        "已加载"
+      ],
+      "metrics": [
+        "模型总数",
+        "已加载数",
+        "归档数"
+      ],
+      "desc": "管理DataVault 2.0建模的Hub、Link和Satellite结构定义",
+      "page_shape": "crud-table",
+      "_page_shape_explicit": true
+    },
+    {
+      "key": "cube_builder",
+      "name": "多维立方",
+      "entity": "Cube定义",
+      "fields": [
+        "Cube名称",
+        "源事实表",
+        "维度组合",
+        "度量集合",
+        "预计算策略",
+        "分区方式",
+        "查询优化"
+      ],
+      "statuses": [
+        "草稿",
+        "计算中",
+        "已就绪",
+        "已失效"
+      ],
+      "actions": [
+        "构建Cube",
+        "失效Cube"
+      ],
+      "action_targets": [
+        "草稿",
+        "已就绪"
+      ],
+      "metrics": [
+        "Cube总数",
+        "已就绪数",
+        "失效数"
+      ],
+      "desc": "构建多维分析立方体，定义维度组合、预计算策略和查询优化方案",
+      "page_shape": "crud-table",
+      "_page_shape_explicit": true
+    },
+    {
+      "key": "slow_change_log",
+      "name": "变更日志",
+      "entity": "维度变更",
+      "fields": [
+        "变更ID",
+        "目标维度",
+        "变更字段",
+        "旧值",
+        "新值",
+        "变更时间",
+        "变更原因"
+      ],
+      "statuses": [
+        "已记录",
+        "已追溯",
+        "已归档"
+      ],
+      "actions": [
+        "追溯变更",
+        "归档记录"
+      ],
+      "action_targets": [
+        "已记录",
+        "已追溯"
+      ],
+      "metrics": [
+        "变更总数",
+        "待追溯数",
+        "已归档数"
+      ],
+      "desc": "记录维度属性每次变更的详细信息，支持历史追溯和审计",
+      "page_shape": "crud-table",
+      "_page_shape_explicit": true
+    },
+    {
+      "key": "date_dim_gen",
+      "name": "日期维度",
+      "entity": "日期记录",
+      "fields": [
+        "日期键",
+        "完整日期",
+        "年份",
+        "季度",
+        "月份",
+        "周次",
+        "是否假日"
+      ],
+      "statuses": [
+        "已生成",
+        "已验证",
+        "需更新"
+      ],
+      "actions": [
+        "生成日期",
+        "验证日期"
+      ],
+      "action_targets": [
+        "需更新",
+        "已生成"
+      ],
+      "metrics": [
+        "日期总数",
+        "已生成数",
+        "待更新数"
+      ],
+      "desc": "生成和维护数仓标准的日期维度表，包括年季月周和假日标记",
+      "page_shape": "crud-table",
+      "_page_shape_explicit": true
+    },
+    {
+      "key": "model_validate",
+      "name": "模型校验",
+      "entity": "校验规则",
+      "fields": [
+        "规则名称",
+        "目标模型",
+        "校验类型",
+        "期望结果",
+        "实际结果",
+        "差异说明",
+        "执行时间"
+      ],
+      "statuses": [
+        "待校验",
+        "校验中",
+        "通过",
+        "未通过"
+      ],
+      "actions": [
+        "执行校验",
+        "确认差异"
+      ],
+      "action_targets": [
+        "待校验",
+        "未通过"
+      ],
+      "metrics": [
+        "规则总数",
+        "通过数",
+        "未通过数"
+      ],
+      "desc": "对数仓模型执行完整性校验，检测维度键缺失和事实度量空值",
+      "page_shape": "crud-table",
+      "_page_shape_explicit": true
+    },
+    {
+      "key": "deploy_pipeline",
+      "name": "部署流水线",
+      "entity": "部署任务",
+      "fields": [
+        "任务名称",
+        "目标模型",
+        "部署环境",
+        "前置检查",
+        "回滚方案",
+        "部署状态",
+        "执行日志"
+      ],
+      "statuses": [
+        "待部署",
+        "部署中",
+        "已部署",
+        "部署失败",
+        "已回滚"
+      ],
+      "actions": [
+        "执行部署",
+        "触发回滚"
+      ],
+      "action_targets": [
+        "待部署",
+        "已部署"
+      ],
+      "metrics": [
+        "任务总数",
+        "已部署数",
+        "失败数"
+      ],
+      "desc": "管理数仓模型的部署流水线，包括环境切换、前置检查和回滚机制",
+      "page_shape": "crud-table",
+      "_page_shape_explicit": true
+    }
+  ]
+}
