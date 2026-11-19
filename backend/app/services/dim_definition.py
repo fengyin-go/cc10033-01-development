@@ -24,6 +24,8 @@ class DimDefinitionService(BaseModuleService):
     STATUS_ORDER = ["草稿", "已建模", "已发布", "已停用"]
     ACTION_RULES = {"提交建模": "草稿", "发布维度": "已建模", "停用维度": "已发布"}
     NEGATIVE_ACTIONS = ["停用维度"]
+    # 本模块的动作推进状态：提交建模 → 已建模，发布 → 已发布，停用 → 已停用
+    TRANSITIONS = {"提交建模": "已建模", "发布维度": "已发布", "停用维度": "已停用"}
 
     VALID_SCD_TYPES = {"SCD类型0", "SCD类型1", "SCD类型2", "SCD类型3", "SCD类型4", "SCD类型6"}
     CODE_PATTERN = re.compile(r'^DIM_[A-Z0-9_]+$')
@@ -31,21 +33,25 @@ class DimDefinitionService(BaseModuleService):
     def create_entry(self, values: dict[str, Any]) -> tuple[dict[str, Any] | None, list[str]]:
         """创建维度定义，校验编码格式和SCD类型合法性，发布到数据通道。"""
         # 标准化处理
-        dim_code = str(values.get("维度编码", "")).strip().upper()
+        dim_code = str(values.get("维度编码") or "").strip().upper()
         if dim_code and not self.CODE_PATTERN.match(dim_code):
             dim_code = "DIM_" + re.sub(r'[^A-Z0-9_]', '', dim_code.upper())
             values["维度编码"] = dim_code
 
-        scd_type = str(values.get("SCD类型", "SCD类型2")).strip()
+        scd_type = str(values.get("SCD类型") or "SCD类型2").strip()
         if scd_type not in self.VALID_SCD_TYPES:
             scd_type = "SCD类型2"
-            values["SCD类型"] = scd_type
+        # 无论调用方是否传值，都回写标准化后的 SCD 类型，避免空值流入下游
+        values["SCD类型"] = scd_type
 
-        # 编码唯一性检查
+        # 编码唯一性检查：复用维度编码时，旧定义必须已停用
         existing = store.rows(self.MODULE)
         for row in existing:
             if row.get("维度编码") == dim_code:
-                return None, [f"维度编码 {dim_code} 已存在"]
+                if row.get("status") != "已停用":
+                    return None, [f"维度编码 {dim_code} 已存在"]
+                # 旧版本保留在快照历史里，新版本不会并入它的字段
+                row["复用标记"] = f"由定义 {row.get('id')} 停用后复用"
 
         entry, missing = super().create_entry(values)
         if entry is None:
@@ -74,13 +80,30 @@ class DimDefinitionService(BaseModuleService):
         if entry is None:
             return None, message
 
+        # 状态流转只在服务层推进，避免把动作前的状态写回记录
+        target = self.TRANSITIONS.get(action)
+        if target is not None:
+            entry["status"] = target
+            entry["pending"] = target != self.STATUS_ORDER[-1]
+            entry["abnormal"] = action in self.NEGATIVE_ACTIONS
+
         if action == "发布维度":
+            # 生成维度属性发布快照：统一发布依据，供 dim_attr 校验归属并登记
+            snapshot = store.publish.open_snapshot(entry)
+            entry["发布快照ID"] = snapshot["snapshot_id"]
+            entry["发布版本"] = snapshot["version"]
+            entry["发布状态"] = snapshot["status"]
             # 发布维度时，通知下游模块处理维度发布事件
             store.channel.publish("dim.published", {
                 "dim_code": entry["维度编码"],
                 "dim_name": entry["维度名称"],
                 "scd_type": entry["SCD类型"],
                 "primary_key": entry["主键定义"],
+                "primary_key_type": snapshot["primary_key_type"],
+                "publish_snapshot_id": snapshot["snapshot_id"],
+                "publish_version": snapshot["version"],
+                "snapshot_status": snapshot["status"],
+                "missing_required_fields": snapshot["missing_required_fields"],
                 "granularity": entry["粒度说明"],
                 "source": entry["数据来源"],
                 "refresh_frequency": entry["刷新频率"],

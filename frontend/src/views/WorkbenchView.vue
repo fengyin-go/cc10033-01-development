@@ -28,6 +28,11 @@
       </span>
     </p>
 
+    <PublishSnapshotPanel
+      v-if="meta.key === 'dim_attr'"
+      ref="publishPanel"
+    />
+
     <form class="filter-bar" @submit.prevent="reload">
       <label v-for="field in filterFields" :key="field" class="filter-item">
         <span>{{ field }}</span>
@@ -103,6 +108,7 @@ import {
   moduleMeta,
   runAction as applyAction,
 } from '@/api/backend-service'
+import PublishSnapshotPanel from '@/components/PublishSnapshotPanel.vue'
 import type { EntryRow } from '@/data/types'
 
 const props = defineProps<{ moduleKey: string }>()
@@ -115,6 +121,7 @@ const filterFields = meta.fields.slice(0, 3)
 const showCreate = ref(false)
 const creating = ref(false)
 const createValues = ref<Record<string, string>>({})
+const publishPanel = ref<InstanceType<typeof PublishSnapshotPanel> | null>(null)
 const stats = computed(() => [
   { label: meta.metrics[0], value: total.value },
   { label: meta.metrics[1], value: rows.value.filter((row) => row.status === meta.statuses[1]).length },
@@ -184,6 +191,10 @@ async function reload() {
     total.value = payload.total
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : '业务列表读取失败'
+  }
+  // 属性登记会改变发布快照的字段与版本，列表刷新后同步刷新发布视图
+  if (meta.key === 'dim_attr') {
+    await publishPanel.value?.refresh()
   }
 }
 

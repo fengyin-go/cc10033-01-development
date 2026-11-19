@@ -10,6 +10,7 @@ from fastapi.responses import StreamingResponse
 
 from app.schemas import ActionPayload, ActionResult, EntryPayload, PageResult
 from app.services import service_for
+from app.store import store
 
 router = APIRouter(prefix="/api", tags=["业务资源"])
 
@@ -73,6 +74,34 @@ def export_entries(
     )
 
 
+@router.get("/dim_attr/publish-view", response_model=dict)
+def dim_attr_publish_views() -> dict[str, Any]:
+    """全部已发布维度的发布快照与登记版本清单。"""
+    views = store.publish.list_views()
+    return {"items": views, "total": len(views)}
+
+
+@router.get("/dim_attr/publish-view/{dim_code}", response_model=dict)
+def dim_attr_publish_view(dim_code: str) -> dict[str, Any]:
+    """维度发布视图：快照版本、字段可用时间与登记用到的维度版本。"""
+    view = store.publish.publish_view(dim_code.strip())
+    if view is None:
+        raise HTTPException(status_code=404, detail=f"维度编码 {dim_code} 不存在")
+    return view
+
+
+@router.post("/dim_attr/publish-view/{dim_code}/switch", response_model=ActionResult)
+def dim_attr_switch_snapshot(dim_code: str) -> ActionResult:
+    """必填字段补齐后，把待确认的发布快照切换为生效快照。"""
+    ok, message = store.publish.activate(dim_code.strip())
+    view = store.publish.publish_view(dim_code.strip())
+    return ActionResult(
+        ok=ok,
+        message=message,
+        entry=view if view is not None else None,
+    )
+
+
 @router.get("/{module}/{entry_id}", response_model=dict)
 def get_entry(module: str, entry_id: int) -> dict[str, Any]:
     service = require_service(module)
@@ -87,7 +116,10 @@ def create_entry(module: str, payload: EntryPayload) -> ActionResult:
     service = require_service(module)
     entry, missing = service.create_entry(payload.values)
     if missing:
-        return ActionResult(ok=False, message=f"缺少必填字段：{'、'.join(missing)}")
+        # 必填缺失只报字段名；业务校验失败返回可读原因
+        if all(item in service.REQUIRED_FIELDS for item in missing):
+            return ActionResult(ok=False, message=f"缺少必填字段：{'、'.join(missing)}")
+        return ActionResult(ok=False, message="；".join(missing))
     return ActionResult(ok=True, message=f"{service.ENTITY}已登记", entry=entry)
 
 

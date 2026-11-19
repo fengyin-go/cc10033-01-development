@@ -10,6 +10,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any
 
+from app.publish_snapshots import PublishSnapshotRegistry
 from app.seed import SEED_ROWS
 
 
@@ -325,6 +326,12 @@ class Store:
         self.recovery = FailureRecovery()
         self.snapshot = SnapshotEngine()
         self.artifacts = ArtifactRegistry()
+        # 维度属性发布快照：维度定义发布后供 dim_attr 登记与查询使用
+        self.publish = PublishSnapshotRegistry(self)
+        # 已发布的种子维度先补齐发布快照，保证历史属性有登记依据
+        for row in self.rows("dim_definition"):
+            if row.get("status") == "已发布":
+                self.publish.open_snapshot(row)
 
     def module_names(self) -> list[str]:
         return sorted(self._tables)
